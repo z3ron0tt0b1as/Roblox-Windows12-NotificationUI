@@ -22,7 +22,7 @@ end
 
 local minimized = false
 
-local function ToBounds(X,Y, MW)
+local function ToBounds(X, Y, MW)
     if (X - MW.Size.X.Offset / 2 < 0) then
         X = MW.Size.X.Offset / 2
     end
@@ -43,7 +43,7 @@ local function ToBounds(X,Y, MW)
 end
 
 local function Tween(object, time, properties)
-    local info = TweenInfo.new(time, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
+    local info = TweenInfo.new(time, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
     TweenService:Create(object, info, properties):Play()
 end
 
@@ -83,12 +83,12 @@ end
 
 function MessageBoxT.Show(option)
     option = typeof(option) == "table" and option or {}
-    local MessageDescription = tostring(option.Description) and option.Description or "This is an Notification"
+    local MessageDescription = tostring(option.Description) and option.Description or "This is a Notification"
     local Options = tostring(option.MessageBoxButtons) and option.MessageBoxButtons or "OK"
     local MessageIcon = tostring(option.MessageBoxIcon) and option.MessageBoxIcon or "Warning"
     local ResultCallback = typeof(option.Result) == "function" and option.Result or function() end
     local MessageTitle = tostring(option.Text) and option.Text or ""
-    local CustomPos = option.Position or UDim2.new(0.5,0,0.5,0)
+    local CustomPos = option.Position or UDim2.new(0.5, 0, 0.5, 0)
 
     local GUI
     local Addup = 0
@@ -100,32 +100,43 @@ function MessageBoxT.Show(option)
         GUI.Name = "Notifications"
     end
 
-    local MessageBox = game:GetObjects("rbxassetid://"..ID)[1]
+    local MessageBox = game:GetObjects("rbxassetid://" .. ID)[1]
     MessageBox["UIScale"].Scale = 1
     MessageBox:Clone()
     MessageBox.Parent = GUI
     MessageBox.Position = CustomPos
     MessageBox.Position = UDim2.new(0, MessageBox.AbsolutePosition.X, 0, MessageBox.AbsolutePosition.Y)
 
-    --// Applying Options
+    -- Apply Windows 11 + Pink Futuristic Design
+    MessageBox.BackgroundColor3 = Color3.fromRGB(38, 38, 38) -- Darker base color
+    MessageBox.BackgroundTransparency = 0.2  -- Slight transparency for the glass effect
+    MessageBox.BorderRadius = UDim.new(0, 18)  -- More rounded corners for a modern look
+    MessageBox["Message-Header"].BackgroundTransparency = 1  -- Keep the header transparent
+
+    -- Create a dynamic gradient for the futuristic look
+    MessageBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    MessageBox.BackgroundTransparency = 0.5
+    MessageBox["MessageDescription"].TextColor3 = Color3.fromRGB(255, 255, 255)
+
+    -- Apply Frosted Glass Effect (Blurred Background)
+    local blur = Instance.new("BlurEffect")
+    blur.Size = 24
+    blur.Parent = MessageBox
+
+    -- Gradient Background (pink + blue)
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 105, 180)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 204, 255))})
+    gradient.Parent = MessageBox
+
+    -- Title and Description
     MessageBox["Message-Header"]["Box-Title"].Text = MessageTitle
     MessageBox["MessageDescription"].Text = MessageDescription
     MessageBox["Message-Icons"]["Error"].Image = MessageBoxT.BoxIcons["Error"]
     MessageBox["Message-Icons"]["Warning"].Image = MessageBoxT.BoxIcons["Warning"]
     MessageBox["Message-Icons"]["Question"].Image = MessageBoxT.BoxIcons["Question"]
 
-    -- Apply Windows 12 styling
-    MessageBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)  -- dark mode background
-    MessageBox.BackgroundTransparency = 0.3  -- semi-transparent
-    MessageBox.BorderRadius = UDim.new(0, 12)  -- rounded corners
-    MessageBox["Message-Header"].BackgroundTransparency = 1  -- title bar transparency
-
+    -- Apply drag functionality
     ApplyDrag(MessageBox["Message-Header"], MessageBox)
-
-    -- Add Glassmorphism effect (frosted glass look)
-    MessageBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    MessageBox.BackgroundTransparency = 0.6
-    MessageBox["MessageDescription"].TextColor3 = Color3.fromRGB(255, 255, 255)
 
     -- Icon
     local Icon = MessageBox["Message-Icons"]:FindFirstChild(MessageIcon)
@@ -149,17 +160,19 @@ function MessageBoxT.Show(option)
 
     MessageBox.Size = UDim2.new(0, MessageBox["MessageDescription"].TextBounds.X + 100, 0, MessageBox["MessageDescription"].TextBounds.Y + 70 + Addup)
 
+    -- Button Hover Effects
     if Buttons ~= nil then
         for i, v in pairs(Buttons:GetChildren()) do
             if v:IsA("TextButton") then
-                -- Button hover effect
+                -- Button hover effect (color change on hover)
                 v.MouseEnter:Connect(function()
-                    Tween(v, 0.1, {BackgroundColor3 = Color3.fromRGB(60, 60, 60)})
+                    Tween(v, 0.2, {BackgroundColor3 = Color3.fromRGB(60, 60, 60)})
                 end)
                 v.MouseLeave:Connect(function()
-                    Tween(v, 0.1, {BackgroundColor3 = Color3.fromRGB(50, 50, 50)})
+                    Tween(v, 0.2, {BackgroundColor3 = Color3.fromRGB(50, 50, 50)})
                 end)
 
+                -- Button click event
                 v.MouseButton1Click:Connect(function()
                     ResultCallback(v.Text)
                     game.TweenService:Create(MessageBox["UIScale"], TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
