@@ -22,6 +22,7 @@ end
 
 local minimized = false
 
+-- Function to ensure the message box stays within bounds
 local function ToBounds(X, Y, MW)
     if (X - MW.Size.X.Offset / 2 < 0) then
         X = MW.Size.X.Offset / 2
@@ -42,11 +43,13 @@ local function ToBounds(X, Y, MW)
     return UDim2.new(0, X, 0, Y)
 end
 
+-- Function to animate properties smoothly
 local function Tween(object, time, properties)
     local info = TweenInfo.new(time, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
     TweenService:Create(object, info, properties):Play()
 end
 
+-- Function to apply drag functionality to the message box
 local function ApplyDrag(Component, MainWindow)
     local MouseDown = false
     local MB1 = Enum.UserInputType.MouseButton1
@@ -81,6 +84,7 @@ local function ApplyDrag(Component, MainWindow)
     end)
 end
 
+-- Main function to display the message box
 function MessageBoxT.Show(option)
     option = typeof(option) == "table" and option or {}
     local MessageDescription = tostring(option.Description) and option.Description or "This is a Notification"
@@ -107,38 +111,29 @@ function MessageBoxT.Show(option)
     MessageBox.Position = CustomPos
     MessageBox.Position = UDim2.new(0, MessageBox.AbsolutePosition.X, 0, MessageBox.AbsolutePosition.Y)
 
-    -- Apply Windows 11 + Pink Futuristic Design
-    MessageBox.BackgroundColor3 = Color3.fromRGB(38, 38, 38) -- Darker base color
+    -- Apply Windows 11 + Custom Pink Design
+    MessageBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)  -- Darker base color
     MessageBox.BackgroundTransparency = 0.2  -- Slight transparency for the glass effect
-    MessageBox.BorderRadius = UDim.new(0, 18)  -- More rounded corners for a modern look
-    MessageBox["Message-Header"].BackgroundTransparency = 1  -- Keep the header transparent
+    MessageBox.BorderRadius = UDim.new(0, 10)  -- Rounded corners for the modern look
+    MessageBox["Message-Header"].BackgroundTransparency = 1  -- Keep header transparent
 
-    -- Create a dynamic gradient for the futuristic look
-    MessageBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    MessageBox.BackgroundTransparency = 0.5
-    MessageBox["MessageDescription"].TextColor3 = Color3.fromRGB(255, 255, 255)
-
-    -- Apply Frosted Glass Effect (Blurred Background)
-    local blur = Instance.new("BlurEffect")
-    blur.Size = 24
-    blur.Parent = MessageBox
-
-    -- Gradient Background (pink + blue)
+    -- Add a gradient for the futuristic look
     local gradient = Instance.new("UIGradient")
-    gradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 105, 180)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 204, 255))})
+    gradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 105, 180)),  -- Pink start
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 204, 255))   -- Blue end
+    })
     gradient.Parent = MessageBox
 
-    -- Title and Description
+    -- Icon setup
     MessageBox["Message-Header"]["Box-Title"].Text = MessageTitle
     MessageBox["MessageDescription"].Text = MessageDescription
     MessageBox["Message-Icons"]["Error"].Image = MessageBoxT.BoxIcons["Error"]
     MessageBox["Message-Icons"]["Warning"].Image = MessageBoxT.BoxIcons["Warning"]
     MessageBox["Message-Icons"]["Question"].Image = MessageBoxT.BoxIcons["Question"]
 
-    -- Apply drag functionality
     ApplyDrag(MessageBox["Message-Header"], MessageBox)
 
-    -- Icon
     local Icon = MessageBox["Message-Icons"]:FindFirstChild(MessageIcon)
     Icon.Parent = MessageBox
     Icon.Visible = true
@@ -164,12 +159,12 @@ function MessageBoxT.Show(option)
     if Buttons ~= nil then
         for i, v in pairs(Buttons:GetChildren()) do
             if v:IsA("TextButton") then
-                -- Button hover effect (color change on hover)
+                -- Hover effect for buttons
                 v.MouseEnter:Connect(function()
-                    Tween(v, 0.2, {BackgroundColor3 = Color3.fromRGB(60, 60, 60)})
+                    Tween(v, 0.2, {BackgroundColor3 = Color3.fromRGB(50, 50, 50)})
                 end)
                 v.MouseLeave:Connect(function()
-                    Tween(v, 0.2, {BackgroundColor3 = Color3.fromRGB(50, 50, 50)})
+                    Tween(v, 0.2, {BackgroundColor3 = Color3.fromRGB(45, 45, 45)})
                 end)
 
                 -- Button click event
